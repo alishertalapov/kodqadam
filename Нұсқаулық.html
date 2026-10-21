@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>КодҚадам — баптау нұсқаулығы</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@600;700&family=Nunito:wght@400;700;800&family=JetBrains+Mono:wght@500&subset=cyrillic,cyrillic-ext&display=swap">
+<style>
+:root{--ink:#15273A;--muted:#5E6E80;--line:#E3E8EF;--blue:#2A72DE;--blue-soft:#E2EEFD;--sun:#FFC83A;--sun-soft:#FFF3CC;--mint-soft:#DBF5EA;--coral-soft:#FDE6E3;--bg:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Nunito",system-ui,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:32px max(16px,env(safe-area-inset-left)) 64px}
+h1,h2,h3{font-family:"Rubik","Nunito",sans-serif;line-height:1.25;margin:0}
+h1{font-size:clamp(1.6rem,4vw,2.2rem)}
+h2{font-size:1.25rem;display:flex;align-items:center;gap:12px}
+h2 .n{width:36px;height:36px;border-radius:10px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:1rem;flex:none}
+.lead{color:var(--muted);margin:10px 0 0}
+section{border:1px solid var(--line);border-radius:16px;padding:22px;margin-top:18px}
+ol,ul{padding-left:22px;margin:10px 0 0}
+li{margin:6px 0}
+code,.path{font-family:"JetBrains Mono",monospace;font-size:.88em;background:#F2F5F9;padding:1px 6px;border-radius:6px;word-break:break-word}
+.path{font-weight:500}
+.note{background:var(--sun-soft);border-radius:12px;padding:12px 14px;margin-top:12px}
+.ok{background:var(--mint-soft);border-radius:12px;padding:12px 14px;margin-top:12px}
+.warn{background:var(--coral-soft);border-radius:12px;padding:12px 14px;margin-top:12px}
+pre{background:#FAFBFD;border:1px solid var(--line);border-radius:12px;padding:12px 14px;overflow-x:auto;font:13.5px/1.55 "JetBrains Mono",monospace;margin:10px 0 0}
+.files{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin-top:10px}
+.files b{font-family:"JetBrains Mono",monospace;font-size:.92em}
+table{border-collapse:collapse;width:100%;margin-top:10px;font-size:.95em}
+td,th{border-top:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+a{color:var(--blue)}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>КодҚадам: Firebase-ке қосу нұсқаулығы</h1>
+<p class="lead">Бұл нұсқаулық сайтты Claude-сыз, өз Firebase жобаңызда іске қосуға арналған. Барлығы тегін (Spark жоспары, банк картасы керек емес). Шамамен 30 минут кетеді. Қадамдарды ретімен орындаңыз.</p>
+
+<section>
+<h3>Архивтегі файлдар</h3>
+<div class="files">
+<b>index.html</b><span>Сайттың өзі. Өзгертпеңіз.</span>
+<b>config.js</b><span>Баптаулар. <b>Тек осы файлды</b> өзгертесіз (Блокнотпен ашуға болады).</span>
+<b>firestore.rules</b><span>Деректер қорының қорғау ережелері. 4-қадамда Firebase-ке көшіресіз.</span>
+<b>manifest.json, sw.js, icon-*.png</b><span>Сайтты қосымша ретінде орнатуға арналған.</span>
+<b>native, .github</b><span>Android, Windows, macOS қосымшалары. Олар туралы <b>Қосымшалар-нұсқаулық.html</b> файлында жазылған.</span>
+</div>
+</section>
+
+<section>
+<h2><span class="n">1</span>Firebase жобасын ашу</h2>
+<ol>
+<li><a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a> сайтына Google аккаунтыңызбен кіріңіз.</li>
+<li><b>Create a project</b> (Жоба жасау) батырмасын басыңыз. Атауы: мысалы <code>kodqadam</code>.</li>
+<li>Google Analytics сұраса, өшіріп қоюға болады. <b>Create project</b>.</li>
+</ol>
+</section>
+
+<section>
+<h2><span class="n">2</span>Логинмен кіруді қосу</h2>
+<ol>
+<li>Сол жақ мәзір: <span class="path">Build → Authentication</span> → <b>Get started</b>.</li>
+<li><b>Sign-in method</b> қойындысы → <b>Email/Password</b> → бірінші қосқышты <b>Enable</b> етіп → <b>Save</b>.</li>
+</ol>
+<div class="note">Оқушылар email енгізбейді: олар <code>aigerim.bekova</code> сияқты логинмен кіреді. Сайт логинді ішкі email-ге өзі айналдырады.</div>
+</section>
+
+<section>
+<h2><span class="n">3</span>Веб-қосымшаны тіркеп, config.js-ті толтыру</h2>
+<ol>
+<li>Жобаның басты бетінде (Project Overview) <b>&lt;/&gt;</b> (Web) белгішесін басыңыз.</li>
+<li>Атауы: <code>kodqadam</code>. «Firebase Hosting» белгісін қоймаңыз. <b>Register app</b>.</li>
+<li>Экранда <code>const firebaseConfig = { ... }</code> деген код шығады. Ішіндегі 6 мәнді <b>config.js</b> файлындағы сәйкес жерлерге көшіріңіз:</li>
+</ol>
+<pre>firebase: {
+  apiKey: "AIzaSy...",
+  authDomain: "kodqadam-1234.firebaseapp.com",
+  projectId: "kodqadam-1234",
+  storageBucket: "kodqadam-1234.firebasestorage.app",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:abc123..."
+},</pre>
+<div class="note">Бұл кодты кейін де табуға болады: <span class="path">⚙ Project settings → General → Your apps</span>. <code>apiKey</code> құпия емес, ол сайтта ашық тұра береді. Деректерді 4-қадамдағы ережелер қорғайды.</div>
+</section>
+
+<section>
+<h2><span class="n">4</span>Деректер қорын (Firestore) ашу</h2>
+<ol>
+<li><span class="path">Build → Firestore Database</span> → <b>Create database</b>.</li>
+<li>Орны (location): Қазақстанға жақын, мысалы <code>eur3 (Europe)</code>. <b>Production mode</b> таңдаңыз → <b>Create</b>.</li>
+<li><b>Rules</b> қойындысын ашып, ондағы барлық мәтінді өшіріңіз. <b>firestore.rules</b> файлының мазмұнын түгел көшіріп қойыңыз → <b>Publish</b>.</li>
+</ol>
+<div class="warn">Ережелерді міндетті түрде қойыңыз. Онсыз мұғалім тіркелмейді, оқушылардың нәтижесі сақталмайды.</div>
+</section>
+
+<section>
+<h2><span class="n">5</span>ЖИ-ді (Gemini) қосу</h2>
+<ol>
+<li>Сол жақ мәзір: <span class="path">AI Services → AI Logic</span> → <b>Get started</b>.</li>
+<li>Gemini API провайдерін сұрағанда <b>Gemini Developer API</b> таңдаңыз (тегін нұсқа, карта керек емес).</li>
+<li>Шебердің соңына дейін <b>Continue</b> басыңыз. Қосымшаны тіркеуді сұраса, 3-қадамдағы <code>kodqadam</code> қосымшасын таңдаңыз.</li>
+</ol>
+<div class="note">ЖИ үшін App Check қорғанысы керек (2026 жылғы 2 қарашадан бастап міндетті). Оны сайт орналасқаннан кейін, 7-қадамда қосамыз, өйткені оған сайттың мекенжайы керек.</div>
+</section>
+
+<section>
+<h2><span class="n">6</span>Сайтты интернетке орналастыру (GitHub Pages, тегін)</h2>
+<ol>
+<li><a href="https://github.com" target="_blank" rel="noopener">github.com</a>-та тегін аккаунт ашыңыз (мысалы, пайдаланушы аты <code>asem-teacher</code>).</li>
+<li>Жоғарғы оң жақтағы <b>+</b> → <b>New repository</b>. Атауы: <code>kodqadam</code>, <b>Public</b> → <b>Create repository</b>.</li>
+<li><b>uploading an existing file</b> сілтемесін басып, архивтегі файлдарды (index.html, config.js, manifest.json, sw.js, барлық icon-*.png) сүйреп әкеліңіз → <b>Commit changes</b>. Қосымшалар керек болса, native папкасын да жүктеңіз.</li>
+<li><span class="path">Settings → Pages</span> → Source: <b>Deploy from a branch</b> → Branch: <code>main</code>, папка <code>/ (root)</code> → <b>Save</b>.</li>
+<li>1–2 минуттан кейін сол бетте сайттың мекенжайы шығады: <code>https://asem-teacher.github.io/kodqadam/</code>.</li>
+<li><b>Маңызды:</b> Firebase-ке оралып, <span class="path">Authentication → Settings → Authorized domains → Add domain</span> → <code>asem-teacher.github.io</code> қосыңыз.</li>
+</ol>
+<div class="note">config.js-ті кейін өзгертсеңіз, GitHub-та файлды қайта жүктеу жеткілікті (<b>Add file → Upload files</b>).</div>
+</section>
+
+<section>
+<h2><span class="n">7</span>App Check (ЖИ үшін қорғаныс)</h2>
+<ol>
+<li><a href="https://console.cloud.google.com/security/recaptcha" target="_blank" rel="noopener">console.cloud.google.com/security/recaptcha</a> ашыңыз. Жоғарыда Firebase жобаңызды таңдаңыз. API-ді қосуды сұраса — <b>Enable</b>.</li>
+<li><b>Create key</b>: атауы <code>kodqadam</code>, түрі <b>Website / Web</b>. Домендер: <code>asem-teacher.github.io</code>. «Checkbox challenge» белгісін <b>қоймаңыз</b>. <b>Create</b>.</li>
+<li>Кілттің ID-ін (ұзын жол, <code>6L...</code> деп басталады) көшіріп, <b>config.js</b>-тегі <code>recaptchaSiteKey: ""</code> ішіне қойыңыз. Файлды GitHub-қа қайта жүктеңіз.</li>
+<li>Firebase console: <span class="path">Security → App Check → Apps</span> → <code>kodqadam</code> веб-қосымшасы → <b>reCAPTCHA Enterprise</b> → кілтті қойыңыз → <b>Save</b>.</li>
+<li><span class="path">App Check → APIs</span> қойындысында <b>Firebase AI Logic</b> үшін <b>Enforce</b> басыңыз (бұрын қосылмаған болса).</li>
+</ol>
+</section>
+
+<section>
+<h2><span class="n">8</span>Бірінші іске қосу: мұғалім аккаунты</h2>
+<ol>
+<li>Сайтты ашыңыз: <code>https://asem-teacher.github.io/kodqadam/</code>.</li>
+<li>Кіру бетінде <b>«Алғашқы баптау»</b> блогы шығады → <b>Мұғалім аккаунтын жасау</b>.</li>
+<li>Атыңызды, email-іңізді және құпиясөзді (кемінде 8 таңба) жазыңыз. Енді бұл аккаунт — сайттың жалғыз мұғалімі. Кейін кіргенде email мен құпиясөзді жазасыз.</li>
+</ol>
+<div class="ok">Мұғалім тіркелгеннен кейін «Алғашқы баптау» блогы ешкімге көрінбейді. Басқа ешкім мұғалім бола алмайды.</div>
+</section>
+
+<section>
+<h2><span class="n">9</span>Оқушыларды қосу және логин тарату</h2>
+<ol>
+<li>Мұғалім бөлімі → <b>Оқушылар</b>.</li>
+<li>Сыныпты жазыңыз (мысалы <code>9А</code>), төменгі өріске оқушылардың аты-жөнін әр жолға біреуден қойыңыз (Excel-ден көшіріп қоюға болады) → <b>Аккаунттарды жасау</b>.</li>
+<li>Жүйе әр оқушыға логин (<code>aigerim.bekova</code>) мен құпиясөз (<code>topa81</code>) жасайды. <b>Логиндер тізімі (CSV)</b> батырмасымен Excel файлын жүктеп алып, әр оқушыға өз логинін беріңіз.</li>
+<li>Оқушы сайтты ашып, логин мен құпиясөзін жазып кіреді. Оның нәтижесі бірден «Сынып» бетінде көрінеді.</li>
+</ol>
+<div class="note">Оқушы құпиясөзін ұмытса: «Оқушылар» бетінде <b>Құпиясөздерді көрсету</b> батырмасын басып, қайта айтып беріңіз.</div>
+</section>
+
+<section>
+<h3>Телефонда қосымша сияқты орнату</h3>
+<ul>
+<li><b>Android (Chrome):</b> сайтты ашып → ⋮ → <b>Негізгі экранға қосу</b> (Add to Home screen / Install app).</li>
+<li><b>iPhone (Safari):</b> сайтты ашып → Бөлісу батырмасы → <b>На экран «Домой»</b>.</li>
+</ul>
+</section>
+
+<section>
+<h3>Шектеулер мен құны</h3>
+<table>
+<tr><th>Не</th><th>Тегін шегі (шамамен)</th></tr>
+<tr><td>Firestore деректер қоры</td><td>Күніне 50 000 оқу және 20 000 жазу. Бір сыныпқа әбден жетеді.</td></tr>
+<tr><td>Логинмен кіру</td><td>Шексіз дерлік. Бір IP-ден сағатына 100-ге жуық жаңа аккаунт жасауға болады, үлкен тізімді бөліп қосыңыз.</td></tr>
+<tr><td>ЖИ (Gemini тегін деңгейі)</td><td>Минутына және күніне сұрау шегі бар, Google оны мезгіл-мезгіл өзгертеді. Шек <b>бүкіл сыныпқа ортақ</b>. Шекке жеткенде ментор «қазір бос емес» дейді, кейін қайта жұмыс істейді.</td></tr>
+<tr><td>GitHub Pages</td><td>Тегін.</td></tr>
+</table>
+<div class="warn">Gemini-дің тегін деңгейінде Google сұраулардың мазмұнын өз қызметтерін жақсартуға пайдалануы мүмкін. Оқушыларға менторға жеке ақпарат (телефон, мекенжай) жазбауды айтыңыз.</div>
+</section>
+
+<section>
+<h3>Ақаулар болса</h3>
+<table>
+<tr><th>Белгі</th><th>Не істеу керек</th></tr>
+<tr><td>«Сайт әлі бапталмаған»</td><td>config.js толтырылмаған немесе GitHub-қа жүктелмеген (3-қадам).</td></tr>
+<tr><td>Кіргенде «auth/unauthorized-domain» не кіру жүрмейді</td><td>Сайт доменін Authorized domains тізіміне қосыңыз (6-қадам, 6-тармақ).</td></tr>
+<tr><td>«Мұғалім аккаунтын тіркеу мүмкін болмады»</td><td>Firestore ережелері қойылмаған (4-қадам, 3-тармақ).</td></tr>
+<tr><td>«Firebase-те Email/Password кіру тәсілі қосылмаған»</td><td>2-қадамды орындаңыз.</td></tr>
+<tr><td>Ментор «ЖИ пайдалануға рұқсат берілмеген» дейді</td><td>App Check бапталмаған не кілт домені қате (7-қадам). config.js-те <code>recaptchaSiteKey</code> толтырылғанын тексеріңіз.</td></tr>
+<tr><td>«Python жүктелмеді»</td><td>Интернет байланысын тексеріңіз. Python cdn.jsdelivr.net сайтынан жүктеледі. Мектеп желісі оны бұғаттап тұрмағанын тексеріңіз.</td></tr>
+<tr><td>Модель табылмады (ЖИ қатесі)</td><td>config.js-тегі <code>aiModel</code> атауын Firebase AI Logic құжаттамасындағы қазіргі модельге ауыстырыңыз.</td></tr>
+</table>
+</section>
+
+</div></body>
+</html>

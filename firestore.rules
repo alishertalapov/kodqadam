@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function teacherDoc() { return /databases/$(database)/documents/config/teacher; }
+    function isTeacher() {
+      return signedIn() && exists(teacherDoc()) && get(teacherDoc()).data.uid == request.auth.uid;
+    }
+
+    // Мұғалім аккаунты: тек бір рет, бірінші тіркелген адам жасайды
+    match /config/teacher {
+      allow read: if true;
+      allow create: if signedIn() && !exists(teacherDoc()) && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Оқушылар тізімі (аты, сыныбы, логині) — тек мұғалім жасайды
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isTeacher());
+      allow write: if isTeacher();
+    }
+
+    // Рейтинг: бәрі оқиды, әр оқушы тек өзінікін жазады
+    match /scores/{uid} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && request.auth.uid == uid && exists(/databases/$(database)/documents/users/$(uid));
+      allow delete: if isTeacher();
+    }
+
+    // Оқушының коды, жоспары, түсіндірмесі: өзі және мұғалім
+    match /works/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isTeacher());
+      allow create, update: if signedIn() && request.auth.uid == uid && exists(/databases/$(database)/documents/users/$(uid));
+      allow delete: if isTeacher();
+    }
+
+    // Үй жұмыстары: бәрі оқиды, тек мұғалім жазады
+    match /assign/{id} {
+      allow read: if signedIn();
+      allow write: if isTeacher();
+    }
+  }
+}
