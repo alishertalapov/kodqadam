@@ -8,12 +8,12 @@ window.KODQADAM_CONFIG = {
      Firebase console → ⚙ Project settings → General → Your apps → Web app →
      «SDK setup and configuration» → Config. Сол жердегі мәндерді осында қойыңыз. */
   firebase: {
-    apiKey: "ОСЫ_ЖЕРГЕ_apiKey_ҚОЙЫҢЫЗ",
-    authDomain: "ЖОБА-ID.firebaseapp.com",
-    projectId: "ЖОБА-ID",
-    storageBucket: "ЖОБА-ID.firebasestorage.app",
-    messagingSenderId: "000000000000",
-    appId: "1:000000000000:web:0000000000000000"
+    apiKey: "AIzaSyB4xuJyO_YdscCEZCSOF13Qq-YnwFdg4tk",
+    authDomain: "kodqadam.firebaseapp.com",
+    projectId: "kodqadam",
+    storageBucket: "kodqadam.firebasestorage.app",
+    messagingSenderId: "482671258520",
+    appId: "1:482671258520:web:4e8f196ec5d522c71259ed"
   },
 
   /* 2) reCAPTCHA Enterprise кілті (App Check). ЖИ жұмыс істеуі үшін керек.
